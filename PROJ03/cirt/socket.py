@@ -22,19 +22,46 @@ class Socket:
     # Let's take a moment to thank everyone who has worked on
     # implementing TCP for our respective operating systems.
     ##################################################################
+
+    # Client Side 3-way Handshake
     def connect(self, address):
         print("connect!")
+        self.cb.seqno = C_ISN
+        self.cb.dst = address
+        self.coutput.cirt_output()
+        self.cb.state = SYN_SENT
+        packet, address = self.cinput.cirt_input()
+        if not packet.is_synack:
+            raise Exception("Expected SYNACK")
+        self.cb.ackno = packet.seqno + 1
+        self.cb.state = ESTABLISHED
+        self.coutput.cirt_output()
 
 
+    # Server Side 3-way Handshake
     def listen(self, port):
         addr = ('127.0.0.1', port)
         self.cb.sock.bind(addr)
         self.cb.state = LISTEN
-
+        
 
     def accept(self):
         print("accept a connection!")
-
+        self.cb.seqno = S_ISN
+        packet, address = self.cinput.cirt_input()
+        if not packet.is_syn():
+            raise Exception("Expected SYN")
+        self.cb.ackno = packet.seqno + 1
+        self.cb.dst = address
+        self.cb.state = SYN_RECV
+        self.coutput.cirt_output()
+        packet, address = self.cinput.cirt_input()  
+        if not packet.is_ack:
+            #TODO: Re-send 3 times before dropping
+            raise Exception("Expected ACK")
+        self.cb.state = ESTABLISHED
+        self.cb.seqno += 1
+        
 
     def send(self, data):
         print("send some data!")

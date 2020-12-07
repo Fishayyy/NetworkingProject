@@ -17,3 +17,4 @@ class Cinput:
     
     def cirt_input(self):
         packet, address = self.__recv(512)
+        return packet, address
