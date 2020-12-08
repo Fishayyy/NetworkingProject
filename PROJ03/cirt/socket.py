@@ -34,6 +34,7 @@ class Socket:
         if not packet.is_synack:
             raise Exception("Expected SYNACK")
         self.cb.ackno = packet.seqno + 1
+        self.cb.seqno += 1
         self.cb.state = ESTABLISHED
         self.coutput.cirt_output()
 
@@ -60,7 +61,6 @@ class Socket:
             #TODO: Re-send 3 times before dropping
             raise Exception("Expected ACK")
         self.cb.state = ESTABLISHED
-        self.cb.seqno += 1
         
 
     def send(self, data):
