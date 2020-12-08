@@ -5,6 +5,7 @@ from .controlblock import ControlBlock
 from .coutput import Coutput
 from .cinput import Cinput
 import logging
+import time
 
 class Socket:
     def __init__(self):
@@ -82,15 +83,28 @@ class Socket:
         self.coutput.cirt_output()
         packet, _ = self.cinput.cirt_input()
         if packet.is_fin():
+            # Simultaneous Close
             self.cb.state = CLOSING
             self.coutput.cirt_output()
             packet, _ = self.cinput.cirt_input()
-            if packet.is_ack:
-                self.cb.state = TIME_WAIT
-                self.coutput.cirt_output()
-                #TODO: Wait
-                self.cb.state = CLOSED
-        if not packet.is_ack:
+            if not packet.is_ack():
+                raise Exception("Expected ACK")
+            self.cb.state = TIME_WAIT
+            self.coutput.cirt_output()
+        if packet.is_finack():
+            self.cb.state = TIME_WAIT
+            self.coutput.cirt_output()
+        if packet.is_ack():
+            self.cb.state = FIN_WAIT_2
+            packet, _ = self.cinput.cirt_input()
+            if not packet.is_fin():
+                raise Exception("Expected FIN")
+            self.cb.state = TIME_WAIT
+            self.coutput.cirt_output()
+        else:
             #TODO: Re-send 3 times before dropping
-            raise Exception("Expected ACK")
+            raise Exception("Expected FIN, ACK, or FINACK")
         print("we done here")
+        self.cb.sock.close()
+        time.sleep(2.0)
+        self.cb.state = CLOSED

@@ -18,6 +18,7 @@ FIN_WAIT_2 = 6
 TIME_WAIT = 7
 CLOSE_WAIT = 8
 LAST_ACK = 9
+CLOSING = 10
 
 ### Out Flags Based on State
 OUT_FLAGS = (
@@ -30,7 +31,8 @@ OUT_FLAGS = (
     0,      # FIN-WAIT-2
     ACK,    # TIME-WAIT
     ACK,    # CLOSE_WAIT
-    FINACK # LAST_ACK
+    FINACK, # LAST_ACK
+    ACK,    # CLOSING
     )
 
 ### CB Info
