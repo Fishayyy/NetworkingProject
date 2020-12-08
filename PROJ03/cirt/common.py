@@ -30,8 +30,8 @@ OUT_FLAGS = (
     FIN,    # FIN-WAIT-1
     0,      # FIN-WAIT-2
     ACK,    # TIME-WAIT
-    ACK,    # CLOSE_WAIT
-    FINACK, # LAST_ACK
+    FIN,    # CLOSE_WAIT
+    0,      # LAST_ACK
     ACK,    # CLOSING
     )
 

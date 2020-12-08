@@ -32,7 +32,7 @@ class Socket:
         self.coutput.cirt_output()
         self.cb.state = SYN_SENT
         packet, address = self.cinput.cirt_input()
-        if not packet.is_synack:
+        if not packet.is_synack():
             raise Exception("Expected SYNACK")
         self.cb.ackno = packet.seqno + 1
         self.cb.seqno += 1
@@ -58,24 +58,45 @@ class Socket:
         self.cb.state = SYN_RECV
         self.coutput.cirt_output()
         packet, address = self.cinput.cirt_input()  
-        if not packet.is_ack:
-            #TODO: Re-send 3 times before dropping
+        if not packet.is_ack():
             raise Exception("Expected ACK")
         self.cb.state = ESTABLISHED
         
 
     def send(self, data):
+        if self.cb.state != ESTABLISHED:
+            return
         print("send some data!")
         self.coutput.cirt_output(data)
+        packet, _ = self.cinput.cirt_input()
+        if packet.is_fin():
+            self.__passive_close() 
+        elif not packet.is_ack():
+            raise Exception("Expected ACK")
 
 
     def recv(self, size):
+        if self.cb.state != ESTABLISHED:
+            return b''
         print("receive some data!")
-        packet, _ = self.cinput.cirt_input()  
-        if not packet.is_ack:
-            #TODO: Re-send 3 times before dropping
+        packet, _ = self.cinput.cirt_input() 
+        if packet.is_fin():
+            self.__passive_close() 
+            return b''
+        elif not packet.is_ack():
             raise Exception("Expected ACK")
         return packet.data
+
+    
+    def __passive_close(self):
+        self.coutput.cirt_output()
+        self.cb.state = CLOSE_WAIT
+        self.coutput.cirt_output()
+        self.cb.state = LAST_ACK        
+        packet, _ =self.cinput.cirt_input()
+        if not packet.is_ack():
+            raise Exception("Expected ACK")
+        self.cb.state = CLOSED
 
 
     def close(self):
