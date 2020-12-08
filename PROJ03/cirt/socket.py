@@ -65,11 +65,29 @@ class Socket:
 
     def send(self, data):
         print("send some data!")
+        self.coutput.cirt_output(data)
 
 
     def recv(self, size):
         print("receive some data!")
+        packet, _ = self.cinput.cirt_input()  
+        if not packet.is_ack:
+            #TODO: Re-send 3 times before dropping
+            raise Exception("Expected ACK")
+        return packet.data
 
 
     def close(self):
+        self.cb.state = FIN_WAIT_1
+        self.coutput.cirt_output()
+        packet, _ = self.cinput.cirt_input()
+        if packet.is_fin():
+            self.cb.state = CLOSING
+            self.coutput.cirt_output()
+            packet, _ = self.cinput.cirt_input()
+            if packet.is_ack:
+                self.cb.state = TIME_WAIT
+        if not packet.is_ack:
+            #TODO: Re-send 3 times before dropping
+            raise Exception("Expected ACK")
         print("we done here")

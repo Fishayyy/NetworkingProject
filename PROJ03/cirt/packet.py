@@ -38,6 +38,9 @@ class Packet:
 
     def is_synack(self):
         return self.flags == SYNACK
+
+    def is_finack(self):
+        return self.flags == FIN + ACK
         
     def __str__(self):
         return f'seq:{self.seqno}, ack:{self.ackno}, win:{self.win}, flags:{self.flags} data:\n{self.data}\n'

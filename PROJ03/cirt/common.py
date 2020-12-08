@@ -3,8 +3,9 @@ SYN = 0x01     # 0000 0001
 ACK = 0x02     # 0000 0010
 SYNACK = 0x03  # 0000 0011
 FIN = 0x04     # 0000 0100
+FINACK = 0x06  # 0000 0110
 ERR = 0x08     # 0000 1000
-FLAG_STR = ("NONE","SYN","ACK","SYNACK","FIN","","","","ERR")
+FLAG_STR = ("NONE","SYN","ACK","SYNACK","FIN","","FINACK","","ERR")
 
 ### CIRT States
 CLOSED = 0
@@ -17,6 +18,7 @@ FIN_WAIT_2 = 6
 TIME_WAIT = 7
 CLOSE_WAIT = 8
 LAST_ACK = 9
+CLOSING = 10
 
 ### Out Flags Based on State
 OUT_FLAGS = (
@@ -29,7 +31,8 @@ OUT_FLAGS = (
     0,      # FIN-WAIT-2
     ACK,    # TIME-WAIT
     ACK,    # CLOSE_WAIT
-    0       # LAST_ACK
+    FINACK, # LAST_ACK
+    ACK,    # CLOSING
     )
 
 ### CB Info
