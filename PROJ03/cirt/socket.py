@@ -87,6 +87,9 @@ class Socket:
             packet, _ = self.cinput.cirt_input()
             if packet.is_ack:
                 self.cb.state = TIME_WAIT
+                self.coutput.cirt_output()
+                #TODO: Wait
+                self.cb.state = CLOSED
         if not packet.is_ack:
             #TODO: Re-send 3 times before dropping
             raise Exception("Expected ACK")
