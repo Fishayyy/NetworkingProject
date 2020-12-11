@@ -1,7 +1,7 @@
 import cirt.socket as cirt
 
 try:
-    f = open("idc.jpg", 'wb')
+    f = open("idc.txt", 'wb')
 except:
     print("Cannot open file!")
     exit(1)

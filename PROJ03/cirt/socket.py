@@ -24,6 +24,29 @@ class Socket:
     # implementing TCP for our respective operating systems.
     ##################################################################
 
+    def await_ack(self):
+        packet, address = self.cinput.cirt_input()  
+        if not packet.is_ack():
+            raise Exception("Expected ACK")
+        return packet, address
+
+
+    def await_syn(self):
+        packet, address = self.cinput.cirt_input()
+        if not packet.is_syn():
+            raise Exception("Expected SYN")
+        return packet, address
+
+
+    def recv_ack(self):
+        packet, _ = self.cinput.cirt_input()
+        if packet.is_fin():
+            self.cb.drop = True
+        elif not packet.is_ack():
+            raise Exception("Expected ACK")
+        return packet
+
+
     # Client Side 3-way Handshake
     def connect(self, address):
         print("connect!")
@@ -45,7 +68,7 @@ class Socket:
         addr = ('127.0.0.1', port)
         self.cb.sock.bind(addr)
         self.cb.state = LISTEN
-        
+
 
     def accept(self):
         print("accept a connection!")
@@ -60,6 +83,7 @@ class Socket:
         packet, address = self.cinput.cirt_input()  
         if not packet.is_ack():
             raise Exception("Expected ACK")
+        self.cb.seqno += 1
         self.cb.state = ESTABLISHED
         
 
@@ -85,6 +109,7 @@ class Socket:
             return b''
         elif not packet.is_ack():
             raise Exception("Expected ACK")
+        self.coutput.cirt_output()
         return packet.data
 
     
