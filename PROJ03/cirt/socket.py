@@ -94,7 +94,7 @@ class Socket:
         self.coutput.cirt_output(data)
         packet, _ = self.cinput.cirt_input()
         if packet.is_fin():
-            self.__passive_close() 
+            self.cb.drop = True 
         elif not packet.is_ack():
             raise Exception("Expected ACK")
 
@@ -105,7 +105,7 @@ class Socket:
         print("receive some data!")
         packet, _ = self.cinput.cirt_input() 
         if packet.is_fin():
-            self.__passive_close() 
+            self.cb.drop = True 
             return b''
         elif not packet.is_ack():
             raise Exception("Expected ACK")
@@ -121,35 +121,38 @@ class Socket:
         packet, _ =self.cinput.cirt_input()
         if not packet.is_ack():
             raise Exception("Expected ACK")
-        self.cb.state = CLOSED
 
 
     def close(self):
-        self.cb.state = FIN_WAIT_1
-        self.coutput.cirt_output()
-        packet, _ = self.cinput.cirt_input()
-        if packet.is_fin():
-            # Simultaneous Close
-            self.cb.state = CLOSING
-            self.coutput.cirt_output()
-            packet, _ = self.cinput.cirt_input()
-            if not packet.is_ack():
-                raise Exception("Expected ACK")
-            self.cb.state = TIME_WAIT
-            self.coutput.cirt_output()
-        if packet.is_finack():
-            self.cb.state = TIME_WAIT
-            self.coutput.cirt_output()
-        if packet.is_ack():
-            self.cb.state = FIN_WAIT_2
-            packet, _ = self.cinput.cirt_input()
-            if not packet.is_fin():
-                raise Exception("Expected FIN")
-            self.cb.state = TIME_WAIT
-            self.coutput.cirt_output()
+        if self.cb.drop:
+            self.__passive_close()
         else:
-            #TODO: Re-send 3 times before dropping
-            raise Exception("Expected FIN, ACK, or FINACK")
+            self.cb.state = FIN_WAIT_1
+            self.coutput.cirt_output()
+            packet, _ = self.cinput.cirt_input()
+            if packet.is_fin():
+                # Simultaneous Close
+                self.cb.state = CLOSING
+                self.coutput.cirt_output()
+                packet, _ = self.cinput.cirt_input()
+                if not packet.is_ack():
+                    raise Exception("Expected ACK")
+                self.cb.state = TIME_WAIT
+                self.coutput.cirt_output()
+            if packet.is_finack():
+                self.cb.state = TIME_WAIT
+                self.coutput.cirt_output()
+            if packet.is_ack():
+                self.cb.state = FIN_WAIT_2
+                packet, _ = self.cinput.cirt_input()
+                if not packet.is_fin():
+                    raise Exception("Expected FIN")
+                self.cb.state = TIME_WAIT
+                self.coutput.cirt_output()
+            else:
+                #TODO: Re-send 3 times before dropping
+                raise Exception("Expected FIN, ACK, or FINACK")
+
         print("we done here")
         self.cb.sock.close()
         time.sleep(2.0)
