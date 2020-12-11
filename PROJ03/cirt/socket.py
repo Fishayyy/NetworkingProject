@@ -53,12 +53,14 @@ class Socket:
         self.cb.seqno = C_ISN
         self.cb.dst = address
         self.coutput.cirt_output()
+        self.cb.seqno += 1
         self.cb.state = SYN_SENT
         packet, address = self.cinput.cirt_input()
-        if not packet.is_synack():
+        if packet.is_synack() == False:
             raise Exception("Expected SYNACK")
+        if packet.ackno != self.cb.seqno:
+            raise Exception("Wrong ACK number")
         self.cb.ackno = packet.seqno + 1
-        self.cb.seqno += 1
         self.cb.state = ESTABLISHED
         self.coutput.cirt_output()
 
@@ -80,10 +82,10 @@ class Socket:
         self.cb.dst = address
         self.cb.state = SYN_RECV
         self.coutput.cirt_output()
+        self.cb.seqno += 1
         packet, address = self.cinput.cirt_input()  
         if not packet.is_ack():
             raise Exception("Expected ACK")
-        self.cb.seqno += 1
         self.cb.state = ESTABLISHED
         
 
@@ -105,7 +107,7 @@ class Socket:
         print("receive some data!")
         packet, _ = self.cinput.cirt_input() 
         if packet.is_fin():
-            self.cb.drop = True 
+            self.cb.drop = True
             return b''
         elif not packet.is_ack():
             raise Exception("Expected ACK")
@@ -117,6 +119,7 @@ class Socket:
         self.coutput.cirt_output()
         self.cb.state = CLOSE_WAIT
         self.coutput.cirt_output()
+        self.cb.seqno += 1
         self.cb.state = LAST_ACK        
         packet, _ =self.cinput.cirt_input()
         if not packet.is_ack():
@@ -129,6 +132,7 @@ class Socket:
         else:
             self.cb.state = FIN_WAIT_1
             self.coutput.cirt_output()
+            self.cb.seqno += 1
             packet, _ = self.cinput.cirt_input()
             if packet.is_fin():
                 # Simultaneous Close
@@ -147,6 +151,7 @@ class Socket:
                 packet, _ = self.cinput.cirt_input()
                 if not packet.is_fin():
                     raise Exception("Expected FIN")
+                self.cb.ackno = packet.seqno + 1
                 self.cb.state = TIME_WAIT
                 self.coutput.cirt_output()
             else:

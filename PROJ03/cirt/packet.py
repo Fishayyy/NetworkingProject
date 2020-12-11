@@ -28,7 +28,6 @@ class Packet:
 
     def is_syn(self):
         return self.flags == SYN
-    
 
     def is_ack(self):
         return self.flags == ACK
