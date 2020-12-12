@@ -31,7 +31,7 @@ class Coutput:
             self.cb.seqno += 1
 
         elif self.cb.state == ESTABLISHED:
-            None
+            self.cb.seqno += len(packet.data)
 
         elif self.cb.state == FIN_WAIT_1:
             self.cb.seqno += 1

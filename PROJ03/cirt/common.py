@@ -51,8 +51,8 @@ OUT_FLAGS = (
     )
 
 ### CB Info
-C_ISN = 9991 #2501
-S_ISN = 9137 #1337
+C_ISN = 0 #2501
+S_ISN = 0 #1337
 
 ### Flow Control/Congestion Avoidance
 MSS = 500   # 500 + 12 byte header = 512 bytes

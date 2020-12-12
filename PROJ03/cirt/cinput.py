@@ -50,6 +50,12 @@ class Cinput:
                 packet.data = b''
             elif not packet.is_ack():
                 self.__print_err("ACK", packet.flags)
+            else:
+                if len(packet.data) > 0:
+                    self.cb.ackno = packet.seqno + len(packet.data)
+                else:
+                    if self.cb.seqno != packet.ackno:
+                        raise Exception("Data was not properly acknowledged.")
 
         elif self.cb.state == FIN_WAIT_1:
             if packet.is_fin():
