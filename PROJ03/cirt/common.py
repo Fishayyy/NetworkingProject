@@ -20,6 +20,21 @@ CLOSE_WAIT = 8
 LAST_ACK = 9
 CLOSING = 10
 
+### For printing states
+STATE_TO_STRING = (
+    "CLOSED",
+    "LISTEN",
+    "SYN_SENT",
+    "SYN_RECV",
+    "ESTABLISHED",
+    "FIN_WAIT_1",
+    "FIN_WAIT_2",
+    "TIME_WAIT",
+    "CLOSE_WAIT",
+    "LAST_ACK",
+    "CLOSING"
+    )
+
 ### Out Flags Based on State
 OUT_FLAGS = (
     SYN,    # CLOSED
@@ -30,8 +45,8 @@ OUT_FLAGS = (
     FIN,    # FIN-WAIT-1
     0,      # FIN-WAIT-2
     ACK,    # TIME-WAIT
-    FIN,    # CLOSE_WAIT
-    0,      # LAST_ACK
+    ACK,    # CLOSE_WAIT
+    FIN,    # LAST_ACK
     ACK,    # CLOSING
     )
 
